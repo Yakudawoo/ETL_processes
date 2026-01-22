@@ -40,6 +40,17 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Debug environment variables
+        env:
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_PORT: ${{ secrets.PG_PORT }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_DATABASE: ${{ secrets.PG_DATABASE }}
+        run: |
+          echo "PG_HOST = $PG_HOST"
+          echo "PG_PORT = $PG_PORT"
+          echo "PG_USER = $PG_USER"
+          echo "PG_DATABASE = $PG_DATABASE"
 
       - name: Run ETL to RDS
         env:
