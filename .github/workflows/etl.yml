@@ -1,6 +1,11 @@
 name: Full ETL Pipeline (ETL → Analytics → Visualization)
 
 on:
+  push:
+      branches:
+        - main
+        - master
+        - dev
   workflow_dispatch:
   schedule:
     - cron: "0 7 * * *"
