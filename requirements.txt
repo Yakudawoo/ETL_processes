@@ -1,0 +1,10 @@
+pandas
+numpy
+google-auth
+google-auth-oauthlib
+gspread
+psycopg2-binary
+matplotlib
+seaborn
+sqlalchemy
+python-dotenv
