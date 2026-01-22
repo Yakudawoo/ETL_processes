@@ -4,6 +4,8 @@ import gspread
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from google.oauth2.service_account import Credentials
+from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
 
 load_dotenv()
 # ---------------------------
@@ -59,11 +61,20 @@ DB_HOST = os.getenv("PG_HOST")
 DB_PORT = os.getenv("PG_PORT", "5432")
 DB_NAME = os.getenv("PG_DATABASE")
 
-engine = create_engine(
-    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+print("RAW PORT =", repr(DB_PORT))
+
+db_url = URL.create(
+    drivername="postgresql+psycopg2",
+    username=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    port=int(DB_PORT),
+    database=DB_NAME,
 )
 
+engine = create_engine(db_url)
+
 df.to_sql("financials", engine, if_exists="replace", index=False)
-print("DEBUG_PORT =", DB_PORT)
+
 
 print("✅ Données exportées dans PostgreSQL !")
