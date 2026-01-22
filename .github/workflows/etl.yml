@@ -1,0 +1,96 @@
+name: Full ETL Pipeline (ETL → Analytics → Visualization)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *"
+
+jobs:
+
+  etl:
+    name: 1️⃣ ETL to RDS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create credentials directory
+        run: mkdir -p credentials
+
+      - name: Restore GCP credentials
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS }}" | base64 --decode > credentials/service_account.json
+
+      - name: Verify credentials file
+        run: |
+          if [ ! -f credentials/service_account.json ]; then
+            echo "Credentials file missing!"
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ETL to RDS
+        env:
+          SHEET_ID_1: ${{ secrets.SHEET_ID_1 }}
+          SHEET_ID_2: ${{ secrets.SHEET_ID_2 }}
+          TABLE_NAME: ${{ secrets.TABLE_NAME }}
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_PORT: ${{ secrets.PG_PORT }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+          PG_DATABASE: ${{ secrets.PG_DATABASE }}
+          GOOGLE_APPLICATION_CREDENTIALS: "credentials/service_account.json"
+        run: |
+          python etl_to_rds.py
+
+
+  analytics:
+    name: 2️⃣ Sales Analytics
+    needs: etl     # ← exécuté après ETL
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run analytics
+        run: |
+          python sales_analytics.py
+
+
+  visualization:
+    name: 3️⃣ Sales Visualization
+    needs: analytics   # ← exécuté après analytics
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run visualization
+        run: |
+          python sales_visualization.py
