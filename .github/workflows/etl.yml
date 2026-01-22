@@ -84,8 +84,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Debug environment variables
+        env:
+          PG_HOST: ${{ secrets.PG_HOST }}
+          PG_PORT: ${{ secrets.PG_PORT }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_DATABASE: ${{ secrets.PG_DATABASE }}
+        run: |
+          echo "PG_HOST = $PG_HOST"
+          echo "PG_PORT = $PG_PORT"
+          echo "PG_USER = $PG_USER"
+          echo "PG_DATABASE = $PG_DATABASE"
+
       - name: Checkout repository
         uses: actions/checkout@v3
+
 
       - name: Set up Python
         uses: actions/setup-python@v4

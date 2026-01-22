@@ -64,5 +64,6 @@ engine = create_engine(
 )
 
 df.to_sql("financials", engine, if_exists="replace", index=False)
+print("DEBUG_PORT =", DB_PORT)
 
 print("✅ Données exportées dans PostgreSQL !")
